@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser")
 const app = express();
@@ -18,8 +18,8 @@ app.use(cookieParser())
 app.get("/", (req, res) => {
     res.send("Stay Finder is running")
 })
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vatgn7i.mongodb.net/?retryWrites=true&w=majority`;
+const uri = "mongodb://localhost:27017";
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vatgn7i.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -35,7 +35,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const roomCollection = client.db("roomDB").collection("rooms")
+    const roomCollection = client.db("hotelDB").collection("rooms")
 
     // auth related api
     app.post('/login', async(req, res) => {
@@ -47,6 +47,12 @@ async function run() {
             sameSite: "none"
         })
         .send({success: true})
+    })
+
+    // rooms related api
+    app.get("/rooms", async(req, res) => {
+        const result = await roomCollection.find().toArray()
+        res.send(result)
     })
 
     // Send a ping to confirm a successful connection
