@@ -51,7 +51,15 @@ async function run() {
 
     // rooms related api
     app.get("/rooms", async(req, res) => {
-        const result = await roomCollection.find().toArray()
+        const sortField = req.query.sortField;
+        const sortOrder = req.query.sortOrder;
+
+        let sortObj = {}
+        if(sortField && sortOrder){
+          sortObj[sortField] = sortOrder
+        }
+
+        const result = await roomCollection.find().sort(sortObj).toArray()
         res.send(result)
     })
 
