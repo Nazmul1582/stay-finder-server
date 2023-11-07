@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser")
 const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
@@ -12,6 +13,7 @@ app.use(cors({
     origin: ['http://localhost:5173'],
     credentials: true
 }))
+app.use(cookieParser())
 
 app.get("/", (req, res) => {
     res.send("Stay Finder is running")
