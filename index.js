@@ -74,7 +74,7 @@ async function run() {
     app.patch("/rooms/:id", async(req, res) => {
       const totalSeats = req.body;
       const id = req.params.id;
-      console.log("total Seat = ", totalSeats, "id", id);
+      console.log("total Seat = ", totalSeats);
       const filter = { _id: new ObjectId(id)}
       const updateDoc = {
         $set: {
@@ -95,6 +95,13 @@ async function run() {
       const booking = req.body;
       console.log("booking : ", booking);
       const result = await bookingCollection.insertOne(booking)
+      res.send(result)
+    })
+
+    app.delete("/bookings/:id", async(req, res) => {
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const result = await bookingCollection.deleteOne(filter);
       res.send(result)
     })
 
