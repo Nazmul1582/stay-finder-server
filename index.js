@@ -86,6 +86,11 @@ async function run() {
     })
 
     // bookings related api
+    app.get("/bookings", async(req, res) => {
+      const result = await bookingCollection.find().toArray();
+      res.send(result)
+    })
+
     app.post('/bookings', async(req, res) => {
       const booking = req.body;
       console.log("booking : ", booking);
