@@ -35,7 +35,8 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const roomCollection = client.db("hotelDB").collection("rooms")
+    const roomCollection = client.db("hotelDB").collection("rooms");
+    const bookingCollection = client.db("hotelDB").collection("bookings")
 
     // auth related api
     app.post('/login', async(req, res) => {
@@ -67,6 +68,28 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id)}
       const result = await roomCollection.findOne(query)
+      res.send(result)
+    })
+
+    app.patch("/rooms/:id", async(req, res) => {
+      const totalSeats = req.body;
+      const id = req.params.id;
+      console.log("total Seat = ", totalSeats, "id", id);
+      const filter = { _id: new ObjectId(id)}
+      const updateDoc = {
+        $set: {
+          availability: totalSeats.seat
+        }
+      }
+      const result = await roomCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
+
+    // bookings related api
+    app.post('/bookings', async(req, res) => {
+      const booking = req.body;
+      console.log("booking : ", booking);
+      const result = await bookingCollection.insertOne(booking)
       res.send(result)
     })
 
