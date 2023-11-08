@@ -18,8 +18,8 @@ app.use(cookieParser())
 app.get("/", (req, res) => {
     res.send("Stay Finder is running")
 })
-const uri = "mongodb://localhost:27017";
-// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vatgn7i.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = "mongodb://localhost:27017";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vatgn7i.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -91,10 +91,30 @@ async function run() {
       res.send(result)
     })
 
+    app.get("/bookings/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)}
+      const result = await bookingCollection.findOne(query)
+      res.send(result)
+    })
+
     app.post('/bookings', async(req, res) => {
       const booking = req.body;
       console.log("booking : ", booking);
       const result = await bookingCollection.insertOne(booking)
+      res.send(result)
+    })
+
+    app.patch("/bookings/:id", async(req, res) => {
+      const id = req.params.id;
+      const updatedDate = req.body;
+      const filter = { _id: new ObjectId(id) }
+      const updateDoc = {
+        $set: {
+          date: updatedDate.date
+        }
+      }
+      const result = await bookingCollection.updateOne(filter, updateDoc)
       res.send(result)
     })
 
