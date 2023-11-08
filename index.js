@@ -30,6 +30,23 @@ const client = new MongoClient(uri, {
   }
 });
 
+// custom middleware
+const verifyToken = (req, res, next) => {
+  const token = req.cookies?.token;
+  console.log("value of the token in middleware: ", token);
+  if(!token){
+    return res.status(401).send({message: "unauthorized!"})
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if(err){
+      console.log(err);
+      return res.status(401).send({message: "unauthorized!"})
+    }
+    req.user = decoded;
+    next();
+  })
+}
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -39,15 +56,21 @@ async function run() {
     const bookingCollection = client.db("hotelDB").collection("bookings")
 
     // auth related api
-    app.post('/login', async(req, res) => {
-        const user = req.body;
-        const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: "1h"})
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "none"
-        })
-        .send({success: true})
+    app.post("/login", async(req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: "1h"})
+      res
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: false,
+      })
+      .send({success: true})
+    })
+
+    app.post("/logout", async(req, res) => {
+      const user = req.body;
+      console.log("logout user", user);
+      res.clearCookie('token', {maxAge: 0}).send({success: true})
     })
 
     // rooms related api
@@ -86,9 +109,18 @@ async function run() {
     })
 
     // bookings related api
-    app.get("/bookings", async(req, res) => {
-      const result = await bookingCollection.find().toArray();
-      res.send(result)
+    app.get("/bookings", verifyToken, async(req, res) => {
+      console.log("user in the valid token: ", req.user);
+      if(req.query.email !== req.user.email){
+        return res.status(403).send({message: "forbidden access"})
+      }
+      
+      let query = {}
+      if(req.query?.email){
+        query = {email: req.query.email}
+      }
+      const result = await bookingCollection.find(query).toArray();
+      res.send(result);
     })
 
     app.get("/bookings/:id", async(req, res) => {
