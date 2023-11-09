@@ -53,7 +53,7 @@ async function run() {
     // await client.connect();
 
     const roomCollection = client.db("hotelDB").collection("rooms");
-    const bookingCollection = client.db("hotelDB").collection("bookings")
+    const bookingCollection = client.db("hotelDB").collection("bookings");
 
     // auth related api
     app.post("/login", async(req, res) => {
@@ -108,6 +108,18 @@ async function run() {
       res.send(result)
     })
 
+    app.patch("/room-review/:id", async(req, res) => {
+      const review = req.body;
+      console.log(review);
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id)}
+      const updateDoc = {
+        $push: {reviews: review}
+      }
+      const result = roomCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
+
     // bookings related api
     app.get("/bookings", verifyToken, async(req, res) => {
       console.log("user in the valid token: ", req.user);
@@ -124,6 +136,13 @@ async function run() {
     })
 
     app.get("/bookings/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)}
+      const result = await bookingCollection.findOne(query)
+      res.send(result)
+    })
+
+    app.get("/bookings-review/:id", async(req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id)}
       const result = await bookingCollection.findOne(query)
