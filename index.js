@@ -91,6 +91,12 @@ async function run() {
         res.send(result)
     })
 
+    app.get("/featured-rooms", async(req, res) => {
+      const query = {featured: true}
+      const result = await roomCollection.find(query).toArray()
+      res.send(result)
+    })
+
     app.get("/room-details/:id", async(req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id)}
