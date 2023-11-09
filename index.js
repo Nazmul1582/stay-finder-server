@@ -10,7 +10,11 @@ require("dotenv").config();
 // middleware
 app.use(express.json())
 app.use(cors({
-    origin: ['http://localhost:5173'],
+    origin: [
+      'http://localhost:5173', 
+      "https://stay-finder-ed81c.web.app", 
+      "https://stay-finder-ed81c.firebaseapp.com"
+    ],
     credentials: true
 }))
 app.use(cookieParser())
